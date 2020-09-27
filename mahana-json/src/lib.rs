@@ -1,3 +1,5 @@
+mod tokenize;
+
 #[cfg(test)]
 mod tests {
     #[test]
