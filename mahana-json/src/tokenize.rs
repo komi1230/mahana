@@ -1,9 +1,10 @@
 pub fn tokenize(data: String) -> Vec<String> {
     let mut content: Vec<String> = Vec::new();
     let mut cs = data.chars();
-    let numbers: Vec<char> = (0..10)
+    let mut numbers: Vec<char> = (0..10)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
+    numbers.push('.');
 
     loop {
         let chr = cs.next();
@@ -102,7 +103,9 @@ mod tests {
             "\"Tanaka\"",
             "\"age\"",
             ":",
-            "26",
+            "26.3",
+            "\"animal\"",
+            "true",
             "}",
         ]
         .iter()
