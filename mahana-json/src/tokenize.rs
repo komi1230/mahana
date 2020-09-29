@@ -69,6 +69,18 @@ pub fn tokenize(data: String) -> Vec<String> {
                     }
                 }
 
+                // null
+                if c == 'n' {
+                    let mut word = String::new();
+                    word.push(c);
+                    for _ in 0..3 {
+                        word.push(cs.next().unwrap());
+                    }
+                    if word == "null".to_string() {
+                        content.push(word);
+                    }
+                }
+
                 // number
                 if numbers.contains(&c) {
                     let mut word = String::new();
