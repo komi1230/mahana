@@ -149,6 +149,13 @@ mod tests {
             "26.3",
             "\"animal\"",
             "true",
+            "\"color_list\"",
+            ":",
+            "[",
+            "\"red\"",
+            "\"green\"",
+            "\"blue\"",
+            "]",
             "}",
         ]
         .iter()
