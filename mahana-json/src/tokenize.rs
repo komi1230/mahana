@@ -1,4 +1,4 @@
-pub fn is_number(seq: String) -> bool {
+fn is_number(seq: &str) -> bool {
     match seq.parse::<i32>() {
         Ok(_) => true,
         Err(_) => match seq.parse::<f64>() {
@@ -6,14 +6,6 @@ pub fn is_number(seq: String) -> bool {
             Err(_) => false,
         },
     }
-}
-
-pub fn is_bool(seq: String) -> bool {
-    seq == "true".to_string() || seq == "false".to_string()
-}
-
-pub fn is_null(seq: String) -> bool {
-    seq == "null".to_string()
 }
 
 pub fn tokenize(data: String) -> Result<Vec<String>, String> {
@@ -43,6 +35,16 @@ pub fn tokenize(data: String) -> Result<Vec<String>, String> {
                     let mut word = String::new();
                     word.push(c);
                     while let Some(next_c) = cs.next() {
+                        // escape char
+                        if next_c == '\\' {
+                            word.push(next_c);
+                            match cs.next() {
+                                Some(x) => word.push(x),
+                                None => return Err("Parse Error".to_string()),
+                            };
+                            continue;
+                        }
+                        // double quotation
                         if next_c == '\"' {
                             word.push(next_c);
                             break;
@@ -100,7 +102,11 @@ pub fn tokenize(data: String) -> Result<Vec<String>, String> {
                     while let Some(next_c) = cs.next() {
                         if !numbers.contains(&next_c) {
                             if next_c == ',' {
-                                content.push(word);
+                                if is_number(word.as_str()) {
+                                    content.push(word);
+                                } else {
+                                    return Err("Parse Error".to_string());
+                                }
                                 content.push(next_c.to_string());
                                 break;
                             } else {
@@ -138,18 +144,10 @@ mod tests {
 
     #[test]
     fn test_is_number() {
-        assert!(is_number("3.2".to_string()));
-        assert!(is_number("-20".to_string()));
-        assert!(!is_number("10.9.8".to_string()));
-        assert!(!is_number("hello".to_string()))
-    }
-
-    #[test]
-    fn test_is_bool() {
-        assert!(is_bool("true".to_string()));
-        assert!(is_bool("false".to_string()));
-        assert!(!is_bool("hello".to_string()));
-        assert!(!is_bool("114514".to_string()));
+        assert!(is_number("3.2"));
+        assert!(is_number("-20"));
+        assert!(!is_number("10.9.8"));
+        assert!(!is_number("hello"))
     }
 
     #[test]
