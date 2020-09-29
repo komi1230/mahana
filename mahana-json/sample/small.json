@@ -1,6 +1,6 @@
 {
     "name": "Tanaka",
     "age": 26.3,
-    "animal", true,
+    "animal": true,
     "color_list": [ "red", "green", "blue" ],
 }
