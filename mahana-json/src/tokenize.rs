@@ -12,14 +12,20 @@ pub fn is_bool(seq: String) -> bool {
     seq == "true".to_string() || seq == "false".to_string()
 }
 
-pub fn tokenize(data: String) -> Vec<String> {
+pub fn is_null(seq: String) -> bool {
+    seq == "null".to_string()
+}
+
+pub fn tokenize(data: String) -> Result<Vec<String>, String> {
     let mut content: Vec<String> = Vec::new();
     let mut cs = data.chars();
-    let special_chars = ['{', '}', '[', ']', ':'];
+    let special_chars = ['{', '}', '[', ']', ':', ','];
     let mut numbers: Vec<char> = (0..10)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
     numbers.push('.');
+    numbers.push('e');
+    numbers.push('-');
 
     loop {
         let chr = cs.next();
@@ -27,7 +33,7 @@ pub fn tokenize(data: String) -> Vec<String> {
         match chr {
             None => break,
             Some(c) => {
-                // brace
+                // braces, parenthesis, colon and comma
                 if special_chars.contains(&c) {
                     content.push(c.to_string());
                 }
@@ -56,6 +62,8 @@ pub fn tokenize(data: String) -> Vec<String> {
                     }
                     if word == "true".to_string() {
                         content.push(word);
+                    } else {
+                        return Err("Parse Error".to_string());
                     }
                 }
                 if c == 'f' {
@@ -66,6 +74,8 @@ pub fn tokenize(data: String) -> Vec<String> {
                     }
                     if word == "false".to_string() {
                         content.push(word);
+                    } else {
+                        return Err("Parse Error".to_string());
                     }
                 }
 
@@ -78,6 +88,8 @@ pub fn tokenize(data: String) -> Vec<String> {
                     }
                     if word == "null".to_string() {
                         content.push(word);
+                    } else {
+                        return Err("Parse Error".to_string());
                     }
                 }
 
@@ -87,17 +99,22 @@ pub fn tokenize(data: String) -> Vec<String> {
                     word.push(c);
                     while let Some(next_c) = cs.next() {
                         if !numbers.contains(&next_c) {
-                            break;
+                            if next_c == ',' {
+                                content.push(word);
+                                content.push(next_c.to_string());
+                                break;
+                            } else {
+                                return Err("Parse Error".to_string());
+                            }
                         } else {
                             word.push(next_c);
                         }
                     }
-                    content.push(word);
                 }
             }
         }
     }
-    content
+    Ok(content)
 }
 
 #[cfg(test)]
@@ -144,23 +161,30 @@ mod tests {
             "\"name\"",
             ":",
             "\"Tanaka\"",
+            ",",
             "\"age\"",
             ":",
             "26.3",
+            ",",
             "\"animal\"",
+            ":",
             "true",
+            ",",
             "\"color_list\"",
             ":",
             "[",
             "\"red\"",
+            ",",
             "\"green\"",
+            ",",
             "\"blue\"",
             "]",
+            ",",
             "}",
         ]
         .iter()
         .map(|item| item.to_string())
         .collect();
-        assert_eq!(tokens, answer);
+        assert_eq!(tokens.unwrap(), answer);
     }
 }
