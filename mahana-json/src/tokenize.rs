@@ -35,21 +35,22 @@ pub fn tokenize(data: String) -> Result<Vec<String>, String> {
                     let mut word = String::new();
                     word.push(c);
                     while let Some(next_c) = cs.next() {
-                        // escape char
-                        if next_c == '\\' {
-                            word.push(next_c);
-                            match cs.next() {
-                                Some(x) => word.push(x),
-                                None => return Err("Parse Error".to_string()),
-                            };
-                            continue;
-                        }
-                        // double quotation
-                        if next_c == '\"' {
-                            word.push(next_c);
-                            break;
-                        } else {
-                            word.push(next_c);
+                        match next_c {
+                            '\\' => {
+                                word.push(next_c);
+                                match cs.next() {
+                                    Some(x) => word.push(x),
+                                    None => return Err("Parse Error".to_string()),
+                                };
+                                continue;
+                            }
+                            '\"' => {
+                                word.push(next_c);
+                                break;
+                            }
+                            _ => {
+                                word.push(next_c);
+                            }
                         }
                     }
                     content.push(word);
