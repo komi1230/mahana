@@ -36,6 +36,7 @@ pub fn tokenize(data: String) -> Result<Vec<String>, String> {
                     word.push(c);
                     while let Some(next_c) = cs.next() {
                         match next_c {
+                            // escape
                             '\\' => {
                                 word.push(next_c);
                                 match cs.next() {
@@ -44,6 +45,7 @@ pub fn tokenize(data: String) -> Result<Vec<String>, String> {
                                 };
                                 continue;
                             }
+                            // double quotation
                             '\"' => {
                                 word.push(next_c);
                                 break;
