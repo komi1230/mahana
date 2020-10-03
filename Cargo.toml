@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["komi1230 <yukke.konan@gmail.com>"]
 edition = "2018"
 
+readme = "./README.md"
 
 [workspace]
 members = [
