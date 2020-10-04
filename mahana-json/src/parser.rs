@@ -1,8 +1,25 @@
 use std::collections::HashMap;
 use std::str::Chars;
 
-use crate::util::expect_comma;
-use crate::{Number, Value};
+use crate::util::{expect_token, read_number};
+use crate::Value;
+
+fn parse_number(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
+    let mut num = String::new();
+    num.push(c);
+    while let Some(next_c) = cs.next() {
+        if next_c == ',' || next_c == ']' || next_c == '}' {
+            break;
+        } else {
+            num.push(next_c);
+        }
+    }
+    if let Ok(n) = read_number(num) {
+        return Ok((Value::Number(n), cs));
+    } else {
+        return Err("Parse Error".to_string());
+    }
+}
 
 fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
     let numbers: Vec<char> = (0..9)
@@ -21,32 +38,23 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
                     word.push(c);
                 }
             }
-            if let Ok(next_cs) = expect_comma(cs) {
+            if let Ok(next_cs) = expect_token(cs) {
                 cs = next_cs;
             } else {
                 return Err("Parse Error".to_string());
             }
         }
+
         // number
         if numbers.contains(&c) {
-            let mut num = String::new();
-            while let Some(next_c) = cs.next() {
-                if next_c == ',' {
-                    break;
-                } else if next_c == ']' {
-                    return Ok((Value::Array(content), cs));
-                } else {
-                    num.push(next_c);
-                }
-            }
-            if let Ok(i) = num.parse::<i32>() {
-                content.push(Value::Number(Number::Int(i)))
-            } else if let Ok(f) = num.parse::<f64>() {
-                content.push(Value::Number(Number::Float(f)));
+            if let Ok((result, tmp_cs)) = parse_number(c, cs) {
+                content.push(result);
+                cs = tmp_cs;
             } else {
                 return Err("Parse Error".to_string());
             }
         }
+
         // array
         if c == '[' {
             if let Ok((result, tmp_cs)) = parse_arr(cs.clone()) {
@@ -55,12 +63,13 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
             } else {
                 return Err("Parse Error".to_string());
             }
-            if let Ok(next_cs) = expect_comma(cs) {
+            if let Ok(next_cs) = expect_token(cs) {
                 cs = next_cs;
             } else {
                 return Err("Parse Error".to_string());
             }
         }
+
         // object
         if c == '{' {
             if let Ok((result, tmp_cs)) = parse_object(cs.clone()) {
@@ -69,7 +78,7 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
             } else {
                 return Err("Parse Error".to_string());
             }
-            if let Ok(next_cs) = expect_comma(cs) {
+            if let Ok(next_cs) = expect_token(cs) {
                 cs = next_cs;
             } else {
                 return Err("Parse Error".to_string());
@@ -81,8 +90,8 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
 
 fn parse_object(mut cs: Chars) -> Result<(Value, Chars), String> {
     let content: HashMap<String, Value> = HashMap::new();
-
-    Err("Hello".to_string())
+    while let Some(c) = cs.next() {}
+    Ok((Value::Object(content), cs))
 }
 
 #[cfg(test)]
