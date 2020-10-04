@@ -1,5 +1,4 @@
 mod parser;
-mod tokenize;
 
 use std::collections::HashMap;
 

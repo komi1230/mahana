@@ -61,3 +61,9 @@ pub fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), St
     }
     Ok((Value::Array(content), cs))
 }
+
+pub fn parse_object(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {
+    let content: HashMap<String, Value> = HashMap::new();
+
+    Err("Hello".to_string())
+}
