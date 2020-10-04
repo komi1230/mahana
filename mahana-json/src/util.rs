@@ -2,7 +2,7 @@ use std::str::Chars;
 
 use crate::Number;
 
-fn read_number(seq: String) -> Result<Number, String> {
+pub fn read_number(seq: String) -> Result<Number, String> {
     match seq.parse::<i32>() {
         Ok(i) => Ok(Number::Int(i)),
         Err(_) => match seq.parse::<f64>() {
@@ -34,8 +34,8 @@ mod tests {
         let test_num1 = "32".to_string();
         let test_num2 = "1.23".to_string();
         let test_num3 = "hello".to_string();
-        assert!(parse_number(test_num1).is_ok());
-        assert!(parse_number(test_num2).is_ok());
-        assert!(parse_number(test_num3).is_err());
+        assert!(read_number(test_num1).is_ok());
+        assert!(read_number(test_num2).is_ok());
+        assert!(read_number(test_num3).is_err());
     }
 }
