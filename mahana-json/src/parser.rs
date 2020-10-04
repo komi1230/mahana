@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::util::expect_comma;
 use crate::{Number, Value};
 
 fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {

@@ -8,6 +8,20 @@ fn is_number(seq: &str) -> bool {
     }
 }
 
+// expect comma
+pub fn expect_comma(mut cs: std::str::Chars) -> Result<std::str::Chars, String> {
+    while let Some(next_c) = cs.next() {
+        if next_c == ' ' {
+            continue;
+        } else if next_c == ',' {
+            break;
+        } else {
+            return Err("Parse Error".to_string());
+        }
+    }
+    Ok(cs)
+}
+
 pub fn tokenize(data: String) -> Result<Vec<String>, String> {
     let mut content: Vec<String> = Vec::new();
     let mut cs = data.chars();
