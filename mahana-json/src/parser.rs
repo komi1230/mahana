@@ -67,3 +67,14 @@ pub fn parse_object(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars),
 
     Err("Hello".to_string())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_array() {
+        let test_input = "[12, 34, \"hoge\"]".chars();
+        assert!(parse_arr(test_input).is_ok());
+    }
+}
