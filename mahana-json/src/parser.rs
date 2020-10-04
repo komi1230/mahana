@@ -49,17 +49,15 @@ pub fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), St
                 return Err("Parse Error".to_string());
             }
         }
+        // object
+        if c == '{' {
+            if let Ok((result, tmp_cs)) = parse_object(cs.clone()) {
+                cs = tmp_cs;
+                content.push(result);
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
     }
     Ok((Value::Array(content), cs))
-}
-
-pub fn parse(seq: String) -> Result<HashMap<String, Value>, String> {
-    let result: HashMap<String, Value> = HashMap::new();
-    let mut cs = seq.chars();
-    let braces = ['{', '}'];
-    while let Some(c) = cs.next() {
-        // braces
-        if braces.contains(&c) {}
-    }
-    Ok(result)
 }
