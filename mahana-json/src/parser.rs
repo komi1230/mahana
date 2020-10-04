@@ -20,6 +20,11 @@ fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String
                     word.push(c);
                 }
             }
+            if let Ok(next_cs) = expect_comma(cs) {
+                cs = next_cs;
+            } else {
+                return Err("Parse Error".to_string());
+            }
         }
         // number
         if numbers.contains(&c) {
@@ -49,12 +54,22 @@ fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String
             } else {
                 return Err("Parse Error".to_string());
             }
+            if let Ok(next_cs) = expect_comma(cs) {
+                cs = next_cs;
+            } else {
+                return Err("Parse Error".to_string());
+            }
         }
         // object
         if c == '{' {
             if let Ok((result, tmp_cs)) = parse_object(cs.clone()) {
                 cs = tmp_cs;
                 content.push(result);
+            } else {
+                return Err("Parse Error".to_string());
+            }
+            if let Ok(next_cs) = expect_comma(cs) {
+                cs = next_cs;
             } else {
                 return Err("Parse Error".to_string());
             }
