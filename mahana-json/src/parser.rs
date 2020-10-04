@@ -1,9 +1,10 @@
 use std::collections::HashMap;
+use std::str::Chars;
 
 use crate::util::expect_comma;
 use crate::{Number, Value};
 
-fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {
+fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
@@ -78,7 +79,7 @@ fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String
     Ok((Value::Array(content), cs))
 }
 
-fn parse_object(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {
+fn parse_object(mut cs: Chars) -> Result<(Value, Chars), String> {
     let content: HashMap<String, Value> = HashMap::new();
 
     Err("Hello".to_string())

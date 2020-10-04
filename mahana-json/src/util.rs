@@ -1,3 +1,5 @@
+use std::str::Chars;
+
 fn is_number(seq: &str) -> bool {
     match seq.parse::<i32>() {
         Ok(_) => true,
@@ -9,7 +11,7 @@ fn is_number(seq: &str) -> bool {
 }
 
 // expect comma
-pub fn expect_comma(mut cs: std::str::Chars) -> Result<std::str::Chars, String> {
+pub fn expect_comma(mut cs: Chars) -> Result<Chars, String> {
     while let Some(next_c) = cs.next() {
         if next_c == ' ' {
             continue;
