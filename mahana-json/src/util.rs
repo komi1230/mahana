@@ -12,14 +12,15 @@ pub fn read_number(seq: String) -> Result<Number, String> {
     }
 }
 
-pub fn expect_comma(mut cs: Chars) -> Result<Chars, String> {
+pub fn expect_token(mut cs: Chars) -> Result<Chars, String> {
+    let tokens = [',', ']', '}'];
     while let Some(next_c) = cs.next() {
         if next_c == ' ' {
             continue;
-        } else if next_c == ',' {
+        } else if tokens.contains(&next_c) {
             break;
-        } else if next_c == ']' || next_c == '}' {
-            return Ok(cs);
+        } else {
+            return Err("Parse Error".to_string());
         }
     }
     Ok(cs)
