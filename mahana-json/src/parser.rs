@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{Number, Value};
 
-pub fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {
+fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
@@ -62,7 +62,7 @@ pub fn parse_arr(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), St
     Ok((Value::Array(content), cs))
 }
 
-pub fn parse_object(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {
+fn parse_object(mut cs: std::str::Chars) -> Result<(Value, std::str::Chars), String> {
     let content: HashMap<String, Value> = HashMap::new();
 
     Err("Hello".to_string())
@@ -74,7 +74,7 @@ mod tests {
 
     #[test]
     fn test_parse_array() {
-        let test_input = "[12, 34, \"hoge\"]".chars();
+        let test_input = "[12, [34], \"hoge\"]".chars();
         assert!(parse_arr(test_input).is_ok());
     }
 }
