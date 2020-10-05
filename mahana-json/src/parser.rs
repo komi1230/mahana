@@ -21,6 +21,26 @@ fn parse_number(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
     }
 }
 
+fn parse_string(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
+    let mut word = String::new();
+    word.push(c);
+    while let Some(next_c) = cs.next() {
+        if next_c == '"' {
+            return Ok((Value::String(word), cs));
+        } else if next_c == '\\' {
+            word.push(next_c);
+            if let Some(x) = cs.next() {
+                word.push(x);
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        } else {
+            word.push(next_c);
+        }
+    }
+    Err("Parse Error".to_string())
+}
+
 fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
