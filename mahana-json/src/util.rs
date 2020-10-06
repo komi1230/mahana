@@ -12,13 +12,13 @@ pub fn read_number(seq: String) -> Result<Number, String> {
     }
 }
 
-pub fn expect_token(mut cs: Chars) -> Result<(char, Chars), String> {
+pub fn expect_token(cs: &mut Chars) -> Result<char, String> {
     let tokens = [',', ']', '}'];
     while let Some(next_c) = cs.next() {
         if next_c == ' ' {
             continue;
         } else if tokens.contains(&next_c) {
-            return Ok((next_c, cs));
+            return Ok(next_c);
         } else {
             break;
         }
