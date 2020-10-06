@@ -113,7 +113,7 @@ fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_arr(mut cs: &mut Chars) -> Result<(Value, char), String> {
+fn parse_array(mut cs: &mut Chars) -> Result<(Value, char), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
@@ -122,11 +122,11 @@ fn parse_arr(mut cs: &mut Chars) -> Result<(Value, char), String> {
         // string
         if c == '"' {
             if let Ok((result, next_c)) = parse_string(c, cs) {
+                content.push(result);
                 if next_c == ',' {
                     continue;
                 }
                 if next_c == ']' {
-                    content.push(result);
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -136,12 +136,90 @@ fn parse_arr(mut cs: &mut Chars) -> Result<(Value, char), String> {
         }
 
         // number
-        if numbers.contains(&c) {}
+        if numbers.contains(&c) {
+            if let Ok((result, next_c)) = parse_number(c, cs) {
+                content.push(result);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == ']' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+
+        // boolean
+        if c == 't' || c == 'f' {
+            if let Ok((result, next_c)) = parse_bool(c, cs) {
+                content.push(result);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == ']' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+
+        // null
+        if c == 'n' {
+            if let Ok((result, next_c)) = parse_null(c, cs) {
+                content.push(result);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == ']' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
 
         // array
-        if c == '[' {}
+        if c == '[' {
+            if let Ok((result, next_c)) = parse_array(cs) {
+                content.push(result);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == ']' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+
+        // object
+        if c == '{' {
+            if let Ok((result, next_c)) = parse_object(cs) {
+                content.push(result);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == ']' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
     }
 
+    // wait for special token
+    if let Ok(next_c) = expect_token(cs) {
+        return Ok((Value::Array(content), next_c));
+    }
     Err("Parse Error".to_string())
 }
 
