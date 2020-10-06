@@ -8,7 +8,7 @@ fn parse_number(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
     let mut num = String::new();
     num.push(c);
     while let Some(next_c) = cs.next() {
-        if next_c == ',' || next_c == ']' || next_c == '}' {
+        if next_c == ',' || next_c == ']' || next_c == '}' || next_c == ' ' {
             break;
         } else {
             num.push(next_c);
@@ -25,9 +25,12 @@ fn parse_string(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
     let mut word = String::new();
     word.push(c);
     while let Some(next_c) = cs.next() {
+        // end of string
         if next_c == '"' {
             return Ok((Value::String(word), cs));
-        } else if next_c == '\\' {
+        }
+
+        if next_c == '\\' {
             word.push(next_c);
             if let Some(x) = cs.next() {
                 word.push(x);
@@ -102,7 +105,12 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
 
 fn parse_object(mut cs: Chars) -> Result<(Value, Chars), String> {
     let content: HashMap<String, Value> = HashMap::new();
-    while let Some(c) = cs.next() {}
+    while let Some(c) = cs.next() {
+        // ignore space
+        if c == ' ' {
+            continue;
+        }
+    }
     Ok((Value::Object(content), cs))
 }
 
