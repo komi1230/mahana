@@ -49,10 +49,8 @@ fn parse_string(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> 
         word.push(next_c);
     }
     // wait for special token
-    while let Some(next_c) = cs.next() {
-        if next_c == ',' || next_c == ']' || next_c == '}' {
-            return Ok((Value::String(word), next_c, cs));
-        }
+    if let Ok((next_c, new_cs)) = expect_token(cs) {
+        return Ok((Value::String(word), next_c, new_cs));
     }
     Err("Parse Error".to_string())
 }
@@ -71,10 +69,8 @@ fn parse_null(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> {
         return Err("Parse Error".to_string());
     }
     // wait for special token
-    while let Some(next_c) = cs.next() {
-        if next_c == ',' || next_c == ']' || next_c == '}' {
-            return Ok((Value::Null, next_c, cs));
-        }
+    if let Ok((next_c, new_cs)) = expect_token(cs) {
+        return Ok((Value::Null, next_c, new_cs));
     }
     Err("Parse Error".to_string())
 }
@@ -107,13 +103,11 @@ fn parse_bool(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> {
     }
 
     // expect special token
-    while let Some(next_c) = cs.next() {
-        if next_c == ',' || next_c == ']' || next_c == '}' {
-            if token == "true".to_string() {
-                return Ok((Value::Boolean(true), next_c, cs));
-            } else {
-                return Ok((Value::Boolean(false), next_c, cs));
-            }
+    if let Ok((next_c, new_cs)) = expect_token(cs) {
+        if token == "true".to_string() {
+            return Ok((Value::Boolean(true), next_c, new_cs));
+        } else {
+            return Ok((Value::Boolean(false), next_c, new_cs));
         }
     }
     Err("Parse Error".to_string())
