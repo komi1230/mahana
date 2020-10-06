@@ -4,32 +4,37 @@ use std::str::Chars;
 use crate::util::{expect_token, read_number};
 use crate::Value;
 
-fn parse_number(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
+fn parse_number(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> {
     let mut num = String::new();
     num.push(c);
     while let Some(next_c) = cs.next() {
-        if next_c == ',' || next_c == ']' || next_c == '}' || next_c == ' ' {
-            break;
-        } else {
-            num.push(next_c);
+        // space has no meaning
+        if next_c == ' ' {
+            continue;
         }
+        // these are special token
+        if next_c == ',' || next_c == ']' || next_c == '}' {
+            if let Ok(n) = read_number(num) {
+                return Ok((Value::Number(n), next_c, cs));
+            } else {
+                break;
+            }
+        }
+        // maybe kind of number character
+        num.push(next_c);
     }
-    if let Ok(n) = read_number(num) {
-        return Ok((Value::Number(n), cs));
-    } else {
-        return Err("Parse Error".to_string());
-    }
+    Err("Parse Error".to_string())
 }
 
-fn parse_string(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
+fn parse_string(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> {
     let mut word = String::new();
     word.push(c);
     while let Some(next_c) = cs.next() {
         // end of string
         if next_c == '"' {
-            return Ok((Value::String(word), cs));
+            break;
         }
-
+        // escape character
         if next_c == '\\' {
             word.push(next_c);
             if let Some(x) = cs.next() {
@@ -37,8 +42,14 @@ fn parse_string(c: char, mut cs: Chars) -> Result<(Value, Chars), String> {
             } else {
                 return Err("Parse Error".to_string());
             }
-        } else {
-            word.push(next_c);
+            continue;
+        }
+        // normal character
+        word.push(next_c);
+    }
+    while let Some(next_c) = cs.next() {
+        if next_c == ',' || next_c == ']' || next_c == '}' {
+            return Ok((Value::String(word), next_c, cs));
         }
     }
     Err("Parse Error".to_string())
@@ -52,7 +63,7 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
     while let Some(c) = cs.next() {
         // string
         if c == '"' {
-            if let Ok((result, tmp_cs)) = parse_string(c, cs) {
+            if let Ok((result, _next_c, tmp_cs)) = parse_string(c, cs) {
                 cs = tmp_cs;
                 content.push(result);
             } else {
@@ -62,7 +73,7 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
 
         // number
         if numbers.contains(&c) {
-            if let Ok((result, tmp_cs)) = parse_number(c, cs) {
+            if let Ok((result, _next_c, tmp_cs)) = parse_number(c, cs) {
                 content.push(result);
                 cs = tmp_cs;
             } else {
