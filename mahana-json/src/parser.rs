@@ -29,6 +29,7 @@ fn parse_number(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> 
 fn parse_string(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> {
     let mut word = String::new();
     word.push(c);
+    // process strin
     while let Some(next_c) = cs.next() {
         // end of string
         if next_c == '"' {
@@ -47,6 +48,7 @@ fn parse_string(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> 
         // normal character
         word.push(next_c);
     }
+    // wait for special token
     while let Some(next_c) = cs.next() {
         if next_c == ',' || next_c == ']' || next_c == '}' {
             return Ok((Value::String(word), next_c, cs));
