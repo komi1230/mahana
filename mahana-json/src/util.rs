@@ -12,18 +12,18 @@ pub fn read_number(seq: String) -> Result<Number, String> {
     }
 }
 
-pub fn expect_token(mut cs: Chars) -> Result<Chars, String> {
+pub fn expect_token(mut cs: Chars) -> Result<(char, Chars), String> {
     let tokens = [',', ']', '}'];
     while let Some(next_c) = cs.next() {
         if next_c == ' ' {
             continue;
         } else if tokens.contains(&next_c) {
-            break;
+            return Ok((next_c, cs));
         } else {
-            return Err("Parse Error".to_string());
+            break;
         }
     }
-    Ok(cs)
+    Err("Parse Error".to_string())
 }
 
 #[cfg(test)]
