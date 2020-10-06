@@ -26,9 +26,8 @@ fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_string(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
+fn parse_string(cs: &mut Chars) -> Result<(Value, char), String> {
     let mut word = String::new();
-    word.push(c);
     // process strin
     while let Some(next_c) = cs.next() {
         // end of string
@@ -113,7 +112,7 @@ fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_array(mut cs: &mut Chars) -> Result<(Value, char), String> {
+fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
@@ -121,7 +120,7 @@ fn parse_array(mut cs: &mut Chars) -> Result<(Value, char), String> {
     while let Some(c) = cs.next() {
         // string
         if c == '"' {
-            if let Ok((result, next_c)) = parse_string(c, cs) {
+            if let Ok((result, next_c)) = parse_string(cs) {
                 content.push(result);
                 if next_c == ',' {
                     continue;
@@ -214,6 +213,11 @@ fn parse_array(mut cs: &mut Chars) -> Result<(Value, char), String> {
                 return Err("Parse Error".to_string());
             }
         }
+
+        // end of array
+        if c == ']' {
+            break;
+        }
     }
 
     // wait for special token
@@ -224,12 +228,138 @@ fn parse_array(mut cs: &mut Chars) -> Result<(Value, char), String> {
 }
 
 fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
-    let content: HashMap<String, Value> = HashMap::new();
-    while let Some(c) = cs.next() {
-        // ignore space
-        if c == ' ' {
-            continue;
+    let numbers: Vec<char> = (0..9)
+        .map(|item| std::char::from_digit(item as u32, 10).unwrap())
+        .collect();
+    let mut content: HashMap<String, Value> = HashMap::new();
+
+    loop {
+        // get key
+        let mut key = String::new();
+        while let Some(c) = cs.next() {
+            if c == '"' {
+                if let Ok((result, next_c)) = parse_string(cs) {
+                    if let Value::String(seq) = result {
+                        key = seq;
+                    }
+                    if next_c == ':' {
+                        break;
+                    } else {
+                        while let Some(x) = cs.next() {
+                            if x == ':' {
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
+        // get value
+        let init_c: char;
+        while let Some(c) = cs.next() {
+            if c != ' ' {
+                init_c = c;
+            }
+        }
+        // string
+        if init_c == '"' {
+            if let Ok((value, next_c)) = parse_string(cs) {
+                content.insert(key.to_owned(), value);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == '}' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+        // number
+        if numbers.contains(&init_c) {
+            if let Ok((value, next_c)) = parse_number(init_c, cs) {
+                content.insert(key.to_owned(), value);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == '}' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+        // boolean
+        if init_c == 't' || init_c == 'f' {
+            if let Ok((value, next_c)) = parse_bool(init_c, cs) {
+                content.insert(key.to_owned(), value);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == '}' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+        // null
+        if init_c == 'n' {
+            if let Ok((value, next_c)) = parse_null(init_c, cs) {
+                content.insert(key.to_owned(), value);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == '}' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+        // array
+        if init_c == '[' {
+            if let Ok((value, next_c)) = parse_array(cs) {
+                content.insert(key.to_owned(), value);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == '}' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+        // string
+        if init_c == '{' {
+            if let Ok((value, next_c)) = parse_object(cs) {
+                content.insert(key.to_owned(), value);
+                if next_c == ',' {
+                    continue;
+                }
+                if next_c == ']' {
+                    break;
+                }
+                return Err("Parse Error".to_string());
+            } else {
+                return Err("Parse Error".to_string());
+            }
+        }
+        // end of array
+        if init_c == '}' {
+            break;
+        }
+    }
+    // wait for special token
+    if let Ok(next_c) = expect_token(cs) {
+        return Ok((Value::Object(content), next_c));
     }
     Err("Parse Error".to_string())
 }
@@ -240,7 +370,7 @@ mod tests {
 
     #[test]
     fn test_parse_array() {
-        let test_input = "[12, [34], \"hoge\"]".chars();
-        assert!(parse_arr(test_input).is_ok());
+        let mut test_input = "[12, [34], \"hoge\"]".chars();
+        assert!(parse_array(&mut test_input).is_ok());
     }
 }
