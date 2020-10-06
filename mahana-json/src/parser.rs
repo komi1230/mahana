@@ -49,17 +49,9 @@ fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
     while let Some(c) = cs.next() {
         // string
         if c == '"' {
-            let mut word = String::new();
-            while let Some(next_c) = cs.next() {
-                if next_c == '"' {
-                    content.push(Value::String(word));
-                    break;
-                } else {
-                    word.push(c);
-                }
-            }
-            if let Ok(next_cs) = expect_token(cs) {
-                cs = next_cs;
+            if let Ok((result, tmp_cs)) = parse_string(c, cs) {
+                cs = tmp_cs;
+                content.push(result);
             } else {
                 return Err("Parse Error".to_string());
             }
