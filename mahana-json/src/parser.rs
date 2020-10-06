@@ -57,6 +57,28 @@ fn parse_string(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> 
     Err("Parse Error".to_string())
 }
 
+fn parse_null(c: char, mut cs: Chars) -> Result<(Value, char, Chars), String> {
+    let mut token = String::new();
+    token.push(c);
+    for _ in 0..3 {
+        if let Some(next_c) = cs.next() {
+            token.push(next_c);
+        } else {
+            break;
+        }
+    }
+    if token != "null".to_string() {
+        return Err("Parse Error".to_string());
+    }
+    // wait for special token
+    while let Some(next_c) = cs.next() {
+        if next_c == ',' || next_c == ']' || next_c == '}' {
+            return Ok((Value::Null, next_c, cs));
+        }
+    }
+    Err("Parse Error".to_string())
+}
+
 fn parse_arr(mut cs: Chars) -> Result<(Value, Chars), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
