@@ -356,9 +356,12 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
             break;
         }
     }
+
+    // termination condition
     if let None = cs.next() {
         return Ok((Value::Object(content), None));
     }
+
     // wait for special token
     if let Ok(next_c) = expect_token(cs) {
         return Ok((Value::Object(content), Some(next_c)));
