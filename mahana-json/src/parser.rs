@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str::Chars;
 
 use crate::util::{expect_token, read_number};
-use crate::{Number, Value};
+use crate::Value;
 
 pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut num = String::new();
@@ -10,11 +10,11 @@ pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), St
     while let Some(next_c) = cs.next() {
         // space has no meaning
         if next_c == ' ' {
-            continue;
+            break;
         }
         // these are special token
         if next_c == ',' || next_c == ']' || next_c == '}' {
-            if let Ok(n) = read_number(num) {
+            if let Ok(n) = read_number(&num) {
                 return Ok((Value::Number(n), Some(next_c)));
             } else {
                 break;
@@ -22,6 +22,14 @@ pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), St
         }
         // maybe kind of number character
         num.push(next_c);
+    }
+
+    if let Ok(c) = expect_token(cs) {
+        if c == ',' || c == ']' || c == '}' {
+            if let Ok(n) = read_number(&num) {
+                return Ok((Value::Number(n), Some(c)));
+            }
+        }
     }
     Err("Parse Error".to_string())
 }
@@ -372,6 +380,7 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{Number, Value};
 
     #[test]
     fn test_parse_number() {
@@ -386,10 +395,25 @@ mod tests {
 
         // case2
         let c2 = '3';
-        let mut cs2 = ".14 ]".chars();
+        let mut cs2 = ".14 ], ".chars();
         assert_eq!(
             parse_number(c2, &mut cs2).unwrap(),
             (Value::Number(Number::Float(3.14)), Some(']'))
         );
+        assert_eq!(cs2.next(), Some(','));
+
+        // case3
+        let c3 = '4';
+        let mut cs3 = "}  ,".chars();
+        assert_eq!(
+            parse_number(c3, &mut cs3).unwrap(),
+            (Value::Number(Number::Int(4)), Some('}'))
+        );
+        assert_eq!(cs3.next(), Some(' '));
+
+        // case4 (bad)
+        let c4 = '4';
+        let mut cs4 = " 3,".chars();
+        assert!(parse_number(c4, &mut cs4).is_err());
     }
 }
