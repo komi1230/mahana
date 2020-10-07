@@ -256,12 +256,11 @@ fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
             }
         }
         // get value
-        let init_c: char;
-        while let Some(c) = cs.next() {
-            if c != ' ' {
-                init_c = c;
-            }
-        }
+        let init_c = if let Some(c) = cs.next() {
+            c
+        } else {
+            return Err("Parse Error".to_owned());
+        };
         // string
         if init_c == '"' {
             if let Ok((value, next_c)) = parse_string(cs) {
