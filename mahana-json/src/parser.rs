@@ -4,7 +4,7 @@ use std::str::Chars;
 use crate::util::{expect_token, read_number};
 use crate::Value;
 
-pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut num = String::new();
     num.push(c);
     while let Some(next_c) = cs.next() {
@@ -15,7 +15,7 @@ pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
         // these are special token
         if next_c == ',' || next_c == ']' || next_c == '}' {
             if let Ok(n) = read_number(num) {
-                return Ok((Value::Number(n), next_c));
+                return Ok((Value::Number(n), Some(next_c)));
             } else {
                 break;
             }
@@ -26,7 +26,7 @@ pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-pub fn parse_string(cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_string(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut word = String::new();
     // process strin
     while let Some(next_c) = cs.next() {
@@ -49,12 +49,12 @@ pub fn parse_string(cs: &mut Chars) -> Result<(Value, char), String> {
     }
     // wait for special token
     if let Ok(next_c) = expect_token(cs) {
-        return Ok((Value::String(word), next_c));
+        return Ok((Value::String(word), Some(next_c)));
     }
     Err("Parse Error".to_string())
 }
 
-pub fn parse_null(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_null(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut token = String::new();
     token.push(c);
     for _ in 0..3 {
@@ -69,12 +69,12 @@ pub fn parse_null(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     }
     // wait for special token
     if let Ok(next_c) = expect_token(cs) {
-        return Ok((Value::Null, next_c));
+        return Ok((Value::Null, Some(next_c)));
     }
     Err("Parse Error".to_string())
 }
 
-pub fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut token = String::new();
     token.push(c);
     if c == 't' {
@@ -104,15 +104,15 @@ pub fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     // expect special token
     if let Ok(next_c) = expect_token(cs) {
         if token == "true".to_string() {
-            return Ok((Value::Boolean(true), next_c));
+            return Ok((Value::Boolean(true), Some(next_c)));
         } else {
-            return Ok((Value::Boolean(false), next_c));
+            return Ok((Value::Boolean(false), Some(next_c)));
         }
     }
     Err("Parse Error".to_string())
 }
 
-pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_array(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
@@ -122,10 +122,10 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
         if c == '"' {
             if let Ok((result, next_c)) = parse_string(cs) {
                 content.push(result);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == ']' {
+                if next_c == Some(']') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -138,10 +138,10 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
         if numbers.contains(&c) {
             if let Ok((result, next_c)) = parse_number(c, cs) {
                 content.push(result);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == ']' {
+                if next_c == Some(']') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -154,10 +154,10 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
         if c == 't' || c == 'f' {
             if let Ok((result, next_c)) = parse_bool(c, cs) {
                 content.push(result);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == ']' {
+                if next_c == Some(']') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -170,10 +170,10 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
         if c == 'n' {
             if let Ok((result, next_c)) = parse_null(c, cs) {
                 content.push(result);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == ']' {
+                if next_c == Some(']') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -186,10 +186,10 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
         if c == '[' {
             if let Ok((result, next_c)) = parse_array(cs) {
                 content.push(result);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == ']' {
+                if next_c == Some(']') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -202,10 +202,10 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
         if c == '{' {
             if let Ok((result, next_c)) = parse_object(cs) {
                 content.push(result);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == ']' {
+                if next_c == Some(']') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -222,12 +222,12 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
 
     // wait for special token
     if let Ok(next_c) = expect_token(cs) {
-        return Ok((Value::Array(content), next_c));
+        return Ok((Value::Array(content), Some(next_c)));
     }
     Err("Parse Error".to_string())
 }
 
-pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
@@ -242,7 +242,7 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
                     if let Value::String(seq) = result {
                         key = seq;
                     }
-                    if next_c == ':' {
+                    if next_c == Some(':') {
                         break;
                     } else {
                         while let Some(x) = cs.next() {
@@ -265,10 +265,10 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
         if init_c == '"' {
             if let Ok((value, next_c)) = parse_string(cs) {
                 content.insert(key.to_owned(), value);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == '}' {
+                if next_c == Some('}') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -280,10 +280,10 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
         if numbers.contains(&init_c) {
             if let Ok((value, next_c)) = parse_number(init_c, cs) {
                 content.insert(key.to_owned(), value);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == '}' {
+                if next_c == Some('}') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -295,10 +295,10 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
         if init_c == 't' || init_c == 'f' {
             if let Ok((value, next_c)) = parse_bool(init_c, cs) {
                 content.insert(key.to_owned(), value);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == '}' {
+                if next_c == Some('}') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -310,10 +310,10 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
         if init_c == 'n' {
             if let Ok((value, next_c)) = parse_null(init_c, cs) {
                 content.insert(key.to_owned(), value);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == '}' {
+                if next_c == Some('}') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -325,10 +325,10 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
         if init_c == '[' {
             if let Ok((value, next_c)) = parse_array(cs) {
                 content.insert(key.to_owned(), value);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == '}' {
+                if next_c == Some('}') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -336,14 +336,14 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
                 return Err("Parse Error".to_string());
             }
         }
-        // string
+        // object
         if init_c == '{' {
             if let Ok((value, next_c)) = parse_object(cs) {
                 content.insert(key.to_owned(), value);
-                if next_c == ',' {
+                if next_c == Some(',') {
                     continue;
                 }
-                if next_c == ']' {
+                if next_c == Some('}') {
                     break;
                 }
                 return Err("Parse Error".to_string());
@@ -358,7 +358,7 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
     }
     // wait for special token
     if let Ok(next_c) = expect_token(cs) {
-        return Ok((Value::Object(content), next_c));
+        return Ok((Value::Object(content), Some(next_c)));
     }
     Err("Parse Error".to_string())
 }
