@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str::Chars;
 
 use crate::util::{expect_token, read_number};
-use crate::Value;
+use crate::{Number, Value};
 
 pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut num = String::new();
@@ -367,4 +367,29 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
         return Ok((Value::Object(content), Some(next_c)));
     }
     Err("Parse Error".to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_number() {
+        // case1
+        let c1 = '1';
+        let mut cs1 = ".23,".chars();
+        assert_eq!(
+            parse_number(c1, &mut cs1).unwrap(),
+            (Value::Number(Number::Float(1.23)), Some(','))
+        );
+        assert_eq!(cs1.next(), None);
+
+        // case2
+        let c2 = '3';
+        let mut cs2 = ".14 ]".chars();
+        assert_eq!(
+            parse_number(c2, &mut cs2).unwrap(),
+            (Value::Number(Number::Float(3.14)), Some(']'))
+        );
+    }
 }
