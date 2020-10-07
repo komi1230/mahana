@@ -26,14 +26,30 @@ pub fn expect_token(cs: &mut Chars) -> Result<char, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Number;
 
     #[test]
     fn test_parse_number() {
         let test_num1 = "32";
         let test_num2 = "1.23";
         let test_num3 = "hello";
-        assert!(read_number(test_num1).is_ok());
-        assert!(read_number(test_num2).is_ok());
+        assert_eq!(read_number(test_num1).unwrap(), Number::Int(32));
+        assert_eq!(read_number(test_num2).unwrap(), Number::Float(1.23));
         assert!(read_number(test_num3).is_err());
+    }
+
+    #[test]
+    fn test_expect_token() {
+        // case1
+        let mut cs1 = "   ,".chars();
+        assert_eq!(expect_token(&mut cs1).unwrap(), ',');
+
+        // case2
+        let mut cs2 = "".chars();
+        assert!(expect_token(&mut cs2).is_err());
+
+        // case3
+        let mut cs3 = "     ".chars();
+        assert!(expect_token(&mut cs3).is_err());
     }
 }
