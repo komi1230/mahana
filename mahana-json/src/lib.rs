@@ -54,7 +54,8 @@ mod tests {
     }
 
     #[test]
-    fn hello() {
-        println!("{}", get_json());
+    fn test_parse() {
+        let seq = get_json();
+        assert!(parse(seq).is_ok());
     }
 }
