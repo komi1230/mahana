@@ -4,7 +4,7 @@ use std::str::Chars;
 use crate::util::{expect_token, read_number};
 use crate::Value;
 
-fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     let mut num = String::new();
     num.push(c);
     while let Some(next_c) = cs.next() {
@@ -26,7 +26,7 @@ fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_string(cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_string(cs: &mut Chars) -> Result<(Value, char), String> {
     let mut word = String::new();
     // process strin
     while let Some(next_c) = cs.next() {
@@ -54,7 +54,7 @@ fn parse_string(cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_null(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_null(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     let mut token = String::new();
     token.push(c);
     for _ in 0..3 {
@@ -74,7 +74,7 @@ fn parse_null(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     let mut token = String::new();
     token.push(c);
     if c == 't' {
@@ -112,7 +112,7 @@ fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
@@ -227,7 +227,7 @@ fn parse_array(cs: &mut Chars) -> Result<(Value, char), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
+pub fn parse_object(cs: &mut Chars) -> Result<(Value, char), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
