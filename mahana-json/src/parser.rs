@@ -368,14 +368,3 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     }
     Err("Parse Error".to_string())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_parse_array() {
-        let mut test_input = "[12, [34], \"hoge\"]".chars();
-        assert!(parse_array(&mut test_input).is_ok());
-    }
-}
