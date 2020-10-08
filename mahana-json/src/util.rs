@@ -33,9 +33,11 @@ mod tests {
         let test_num1 = "32";
         let test_num2 = "1.23";
         let test_num3 = "hello";
+        let test_num4 = "";
         assert_eq!(read_number(test_num1).unwrap(), Number::Int(32));
         assert_eq!(read_number(test_num2).unwrap(), Number::Float(1.23));
         assert!(read_number(test_num3).is_err());
+        assert!(read_number(test_num4).is_err());
     }
 
     #[test]
