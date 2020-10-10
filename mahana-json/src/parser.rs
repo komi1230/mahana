@@ -241,6 +241,11 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut content: HashMap<String, Value> = HashMap::new();
 
     loop {
+        if let Ok(c) = expect_token(cs) {
+            if c == '}' {
+                break;
+            }
+        }
         // get key
         let mut key = String::new();
         while let Some(c) = cs.next() {
@@ -252,18 +257,16 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
                     if next_c == Some(':') {
                         break;
                     } else {
-                        while let Some(x) = cs.next() {
-                            if x == ':' {
-                                break;
-                            }
-                        }
-                        break;
+                        return Err("Parse Error".to_string());
                     }
                 }
+            } else {
+                return Err("Parse Error".to_string());
             }
         }
+
         // get value
-        let init_c = if let Some(c) = cs.next() {
+        let init_c = if let Ok(c) = expect_token(cs) {
             c
         } else {
             return Err("Parse Error".to_owned());
@@ -509,5 +512,28 @@ mod tests {
             parse_array(&mut cs3).unwrap(),
             (Value::Array(vec![]), Some(']'))
         );
+
+        // case4
+        let mut cs4 = "{}]  ,".chars();
+        assert!(parse_array(&mut cs4).is_ok());
+
+        // case5
+        let mut cs5 = "{\"hello\": 10}, ] , ".chars();
+        assert!(parse_array(&mut cs5).is_ok());
+    }
+
+    #[test]
+    fn test_parse_object() {
+        // case1
+        let mut cs1 = "}".chars();
+        assert_eq!(parse_object(&mut cs1).unwrap().1, None);
+
+        // case2
+        let mut cs2 = "   }    ,".chars();
+        assert_eq!(parse_object(&mut cs2).unwrap().1, Some(','));
+
+        // case3
+        let mut cs3 = "\"hello\": 10}, ] , ".chars();
+        assert_eq!(parse_object(&mut cs3).unwrap().1, Some(','));
     }
 }
