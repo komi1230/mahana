@@ -21,25 +21,18 @@ pub enum Value {
     Object(HashMap<String, Value>),
 }
 
-pub fn parse(seq: String) -> Result<HashMap<String, Value>, String> {
+pub fn parse(seq: String) -> Option<HashMap<String, Value>> {
     let mut cs = seq.chars();
     if let Some(c) = cs.next() {
         if c == '{' {
             if let Ok((result, _c)) = parse_object(&mut cs) {
                 if let Value::Object(data) = result {
-                    return Ok(data);
-                } else {
-                    return Err("Parse Error".to_string());
+                    return Some(data);
                 }
-            } else {
-                return Err("Parse Error".to_string());
             }
-        } else {
-            return Err("Parse Error".to_string());
         }
-    } else {
-        return Err("Parse Error".to_string());
     }
+    None
 }
 
 #[cfg(test)]
