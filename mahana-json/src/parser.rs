@@ -48,7 +48,6 @@ pub fn parse_string(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
             if let Some(x) = cs.next() {
                 word.push(x);
             } else {
-                return Err("Parse Error".to_string());
             }
             continue;
         }
@@ -105,7 +104,7 @@ pub fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), Stri
     }
 
     // token should be "true" or "false"
-    if token != "false".to_string() || token != "true".to_string() {
+    if token != "false".to_string() && token != "true".to_string() {
         return Err("Parse Error".to_string());
     }
 
@@ -415,5 +414,58 @@ mod tests {
         let c4 = '4';
         let mut cs4 = " 3,".chars();
         assert!(parse_number(c4, &mut cs4).is_err());
+    }
+
+    #[test]
+    fn test_parse_string() {
+        // case1
+        let mut cs1 = "hoge\",".chars();
+        assert_eq!(
+            parse_string(&mut cs1).unwrap(),
+            (Value::String("hoge".to_string()), Some(','))
+        );
+
+        // case2
+        let mut cs2 = "   \"    ]".chars();
+        assert_eq!(
+            parse_string(&mut cs2).unwrap(),
+            (Value::String("   ".to_string()), Some(']'))
+        );
+
+        // case3
+        let mut cs3 = ",".chars();
+        assert!(parse_string(&mut cs3).is_err());
+    }
+
+    #[test]
+    fn test_parse_null() {
+        // case1
+        let c1 = 'n';
+        let mut cs1 = "ull, ".chars();
+        assert_eq!(parse_null(c1, &mut cs1).unwrap(), (Value::Null, Some(',')));
+
+        // case2
+        let c2 = 'n';
+        let mut cs2 = "hoge    ]".chars();
+        assert!(parse_null(c2, &mut cs2).is_err());
+    }
+
+    #[test]
+    fn test_parse_bool() {
+        // case1
+        let c1 = 't';
+        let mut cs1 = "rue,".chars();
+        assert_eq!(
+            parse_bool(c1, &mut cs1).unwrap(),
+            (Value::Boolean(true), Some(','))
+        );
+
+        // case2
+        let c2 = 'f';
+        let mut cs2 = "alse    }".chars();
+        assert_eq!(
+            parse_bool(c2, &mut cs2).unwrap(),
+            (Value::Boolean(false), Some('}'))
+        );
     }
 }
