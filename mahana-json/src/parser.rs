@@ -234,24 +234,6 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     Err("Parse Error".to_string())
 }
 
-fn parse_object_key(cs: &mut Chars) -> Option<String> {
-    if let Some(c) = expect_token(cs) {
-        if c == '"' {
-            if let Ok((result, next_c)) = parse_string(cs) {
-                match next_c {
-                    Some(x) if x == ':' => {
-                        if let Value::String(seq) = result {
-                            return Some(seq);
-                        }
-                    }
-                    _ => return None,
-                }
-            }
-        }
-    }
-    None
-}
-
 pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
