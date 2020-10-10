@@ -467,5 +467,47 @@ mod tests {
             parse_bool(c2, &mut cs2).unwrap(),
             (Value::Boolean(false), Some('}'))
         );
+
+        // case3
+        let c3 = 't';
+        let mut cs3 = "hoge   \"]".chars();
+        assert!(parse_bool(c3, &mut cs3).is_err());
+    }
+
+    #[test]
+    fn test_parse_array() {
+        // case1  == ... [10, 30,] }
+        let mut cs1 = "10, 30,]}".chars();
+        assert_eq!(
+            parse_array(&mut cs1).unwrap(),
+            (
+                Value::Array(vec![
+                    Value::Number(Number::Int(10)),
+                    Value::Number(Number::Int(30))
+                ]),
+                Some('}')
+            )
+        );
+
+        // case2
+        let mut cs2 = "null, false, \"hello\"     ,      ]        ,".chars();
+        assert_eq!(
+            parse_array(&mut cs2).unwrap(),
+            (
+                Value::Array(vec![
+                    Value::Null,
+                    Value::Boolean(false),
+                    Value::String("hello".to_string())
+                ]),
+                Some(',')
+            )
+        );
+
+        // case3
+        let mut cs3 = "]]".chars();
+        assert_eq!(
+            parse_array(&mut cs3).unwrap(),
+            (Value::Array(vec![]), Some(']'))
+        );
     }
 }
