@@ -14,7 +14,7 @@ pub fn read_number(seq: &str) -> Result<Number, String> {
 
 pub fn expect_token(cs: &mut Chars) -> Option<char> {
     while let Some(next_c) = cs.next() {
-        if next_c == ' ' {
+        if next_c == ' ' || next_c == '\n' {
             continue;
         } else {
             return Some(next_c);
