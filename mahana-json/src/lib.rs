@@ -56,6 +56,9 @@ mod tests {
     #[test]
     fn test_parse() {
         let seq = get_json();
-        assert!(parse(seq).is_ok());
+        assert_eq!(
+            parse(seq).unwrap()["age"],
+            Value::Number(Number::Float(26.3))
+        );
     }
 }

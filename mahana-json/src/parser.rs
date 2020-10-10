@@ -234,35 +234,50 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     Err("Parse Error".to_string())
 }
 
+fn parse_object_key(cs: &mut Chars) -> Option<String> {
+    if let Some(c) = expect_token(cs) {
+        if c == '"' {
+            if let Ok((result, next_c)) = parse_string(cs) {
+                match next_c {
+                    Some(x) if x == ':' => {
+                        if let Value::String(seq) = result {
+                            return Some(seq);
+                        }
+                    }
+                    _ => return None,
+                }
+            }
+        }
+    }
+    None
+}
+
 pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
     let mut content: HashMap<String, Value> = HashMap::new();
 
-    loop {
-        if let Some(c) = expect_token(cs) {
-            if c == '}' {
-                break;
-            }
+    while let Some(c) = expect_token(cs) {
+        // termination
+        if c == '}' {
+            break;
         }
+
         // get key
         let mut key = String::new();
-        while let Some(c) = cs.next() {
-            if c == '"' {
-                if let Ok((result, next_c)) = parse_string(cs) {
-                    if let Value::String(seq) = result {
+        if c == '"' {
+            if let Ok((result, next_c)) = parse_string(cs) {
+                if let Value::String(seq) = result {
+                    if next_c == Some(':') {
                         key = seq;
                     }
-                    if next_c == Some(':') {
-                        break;
-                    } else {
-                        return Err("Parse Error".to_string());
-                    }
+                } else {
+                    return Err("Parse Error".to_string());
                 }
-            } else {
-                return Err("Parse Error".to_string());
             }
+        } else {
+            return Err("Parse Error".to_string());
         }
 
         // get value
@@ -367,16 +382,12 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
         }
     }
 
-    // termination condition
-    if let None = cs.next() {
-        return Ok((Value::Object(content), None));
-    }
-
     // wait for special token
     if let Some(next_c) = expect_token(cs) {
         return Ok((Value::Object(content), Some(next_c)));
+    } else {
+        return Ok((Value::Object(content), None));
     }
-    Err("Parse Error".to_string())
 }
 
 #[cfg(test)]
@@ -529,7 +540,7 @@ mod tests {
         assert_eq!(parse_object(&mut cs1).unwrap().1, None);
 
         // case2
-        let mut cs2 = "   }    ,".chars();
+        let mut cs2 = "   }   , ".chars();
         assert_eq!(parse_object(&mut cs2).unwrap().1, Some(','));
 
         // case3
