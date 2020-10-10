@@ -24,7 +24,7 @@ pub fn parse_number(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), St
         num.push(next_c);
     }
 
-    if let Ok(c) = expect_token(cs) {
+    if let Some(c) = expect_token(cs) {
         if c == ',' || c == ']' || c == '}' {
             if let Ok(n) = read_number(&num) {
                 return Ok((Value::Number(n), Some(c)));
@@ -55,7 +55,7 @@ pub fn parse_string(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
         word.push(next_c);
     }
     // wait for special token
-    if let Ok(next_c) = expect_token(cs) {
+    if let Some(next_c) = expect_token(cs) {
         return Ok((Value::String(word), Some(next_c)));
     }
     Err("Parse Error".to_string())
@@ -75,7 +75,7 @@ pub fn parse_null(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), Stri
         return Err("Parse Error".to_string());
     }
     // wait for special token
-    if let Ok(next_c) = expect_token(cs) {
+    if let Some(next_c) = expect_token(cs) {
         return Ok((Value::Null, Some(next_c)));
     }
     Err("Parse Error".to_string())
@@ -109,7 +109,7 @@ pub fn parse_bool(c: char, cs: &mut Chars) -> Result<(Value, Option<char>), Stri
     }
 
     // expect special token
-    if let Ok(next_c) = expect_token(cs) {
+    if let Some(next_c) = expect_token(cs) {
         if token == "true".to_string() {
             return Ok((Value::Boolean(true), Some(next_c)));
         } else {
@@ -228,7 +228,7 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     }
 
     // wait for special token
-    if let Ok(next_c) = expect_token(cs) {
+    if let Some(next_c) = expect_token(cs) {
         return Ok((Value::Array(content), Some(next_c)));
     }
     Err("Parse Error".to_string())
@@ -241,7 +241,7 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let mut content: HashMap<String, Value> = HashMap::new();
 
     loop {
-        if let Ok(c) = expect_token(cs) {
+        if let Some(c) = expect_token(cs) {
             if c == '}' {
                 break;
             }
@@ -266,7 +266,7 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
         }
 
         // get value
-        let init_c = if let Ok(c) = expect_token(cs) {
+        let init_c = if let Some(c) = expect_token(cs) {
             c
         } else {
             return Err("Parse Error".to_owned());
@@ -373,7 +373,7 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     }
 
     // wait for special token
-    if let Ok(next_c) = expect_token(cs) {
+    if let Some(next_c) = expect_token(cs) {
         return Ok((Value::Object(content), Some(next_c)));
     }
     Err("Parse Error".to_string())

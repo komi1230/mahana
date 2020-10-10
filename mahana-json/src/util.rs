@@ -12,15 +12,15 @@ pub fn read_number(seq: &str) -> Result<Number, String> {
     }
 }
 
-pub fn expect_token(cs: &mut Chars) -> Result<char, String> {
+pub fn expect_token(cs: &mut Chars) -> Option<char> {
     while let Some(next_c) = cs.next() {
         if next_c == ' ' {
             continue;
         } else {
-            return Ok(next_c);
+            return Some(next_c);
         }
     }
-    Err("Parse Error".to_string())
+    return None;
 }
 
 #[cfg(test)]
@@ -48,10 +48,10 @@ mod tests {
 
         // case2
         let mut cs2 = "".chars();
-        assert!(expect_token(&mut cs2).is_err());
+        assert!(expect_token(&mut cs2).is_none());
 
         // case3
         let mut cs3 = "     ".chars();
-        assert!(expect_token(&mut cs3).is_err());
+        assert!(expect_token(&mut cs3).is_none());
     }
 }
