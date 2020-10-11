@@ -3,4 +3,8 @@
     "age": 26.3,
     "animal": true,
     "color_list": [ "red", "green", "blue" ],
+    "object_list": [
+      { "name": "Tanaka", "age": 26 },
+      { "name": "Suzuki", "age": 32 }
+    ]
 }
