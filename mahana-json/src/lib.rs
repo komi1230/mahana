@@ -41,7 +41,7 @@ mod tests {
     use std::fs;
 
     fn get_json() -> String {
-        let file_path = "sample/small.json";
+        let file_path = "sample/index.json";
         let content = fs::read_to_string(file_path).unwrap();
         content
     }
