@@ -123,6 +123,7 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
+    let special_tokens = vec![',', '[', ']', '{', '}', ':'];
     let mut content: Vec<Value> = Vec::new();
     while let Some(c) = cs.next() {
         // string
@@ -227,17 +228,18 @@ pub fn parse_array(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
         }
     }
 
-    // wait for special token
-    if let Some(next_c) = expect_token(cs) {
-        return Ok((Value::Array(content), Some(next_c)));
+    match expect_token(cs) {
+        Some(x) if special_tokens.contains(&x) => return Ok((Value::Array(content), Some(x))),
+        Some(_) => return Err("Parse Error".to_string()),
+        None => return Ok((Value::Array(content), None)),
     }
-    Err("Parse Error".to_string())
 }
 
 pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
     let numbers: Vec<char> = (0..9)
         .map(|item| std::char::from_digit(item as u32, 10).unwrap())
         .collect();
+    let special_tokens = vec![',', '[', ']', '{', '}', ':'];
     let mut content: HashMap<String, Value> = HashMap::new();
 
     while let Some(c) = expect_token(cs) {
@@ -364,11 +366,10 @@ pub fn parse_object(cs: &mut Chars) -> Result<(Value, Option<char>), String> {
         }
     }
 
-    // wait for special token
-    if let Some(next_c) = expect_token(cs) {
-        return Ok((Value::Object(content), Some(next_c)));
-    } else {
-        return Ok((Value::Object(content), None));
+    match expect_token(cs) {
+        Some(x) if special_tokens.contains(&x) => return Ok((Value::Object(content), Some(x))),
+        Some(_) => return Err("Parse Error".to_string()),
+        None => return Ok((Value::Object(content), None)),
     }
 }
 
