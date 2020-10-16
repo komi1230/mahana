@@ -52,6 +52,10 @@ mod tests {
     #[test]
     fn test_parse() {
         let seq = get_json();
-        assert!(parse(seq).is_some());
+        let result = parse(seq);
+        assert!(result.is_some());
+        if let Value::Array(x) = result.unwrap() {
+            println!("{:?}", x[0]);
+        }
     }
 }
