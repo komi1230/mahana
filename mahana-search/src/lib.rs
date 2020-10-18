@@ -6,6 +6,19 @@ pub struct Trie<K: Eq + Hash, V: Eq> {
     children: HashMap<K, Trie<K, V>>,
 }
 
+impl<K, V> Trie<K, V>
+where
+    K: Eq + Hash,
+    V: Eq,
+{
+    pub fn new() -> Trie<K, V> {
+        Trie {
+            value: None,
+            children: HashMap::new(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
