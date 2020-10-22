@@ -15,6 +15,8 @@ impl Trie {
             children: HashMap::new(),
         }
     }
+
+    pub fn insert(&mut self) {}
 }
 
 #[cfg(test)]
