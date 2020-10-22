@@ -1,23 +1,20 @@
-use std::collections::HashSet;
-use std::hash::Hash;
+use std::collections::HashMap;
 
-pub struct Trie<V: Ord + Eq + Hash> {
-    value: Option<V>,
-    children: Option<HashSet<V>>,
+pub struct Trie {
+    children: HashMap<char, TrieNode>,
 }
 
-impl<V> Trie<V>
-where
-    V: Ord + Eq + Hash,
-{
-    pub fn new() -> Trie<V> {
+pub struct TrieNode {
+    value: Option<char>,
+    children: HashMap<char, TrieNode>,
+}
+
+impl Trie {
+    pub fn new() -> Trie {
         Trie {
-            value: None,
-            children: Some(HashSet::new()),
+            children: HashMap::new(),
         }
     }
-
-    pub fn insert(&mut self) {}
 }
 
 #[cfg(test)]
