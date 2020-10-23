@@ -1,12 +1,7 @@
 use std::collections::HashMap;
 
 pub struct Trie {
-    children: HashMap<char, TrieNode>,
-}
-
-pub struct TrieNode {
-    value: Option<char>,
-    children: HashMap<char, TrieNode>,
+    children: HashMap<char, Trie>,
 }
 
 impl Trie {
@@ -16,7 +11,18 @@ impl Trie {
         }
     }
 
-    pub fn insert(&mut self) {}
+    pub fn insert(&mut self, data: &str) {
+        let mut cs = data.chars();
+        if let Some(mut node) = self.children.get(&cs.next().unwrap()) {
+            while let Some(c) = cs.next() {
+                if let Some(v) = node.children.get(&c) {
+                    node = v;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
