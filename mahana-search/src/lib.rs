@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Eq, PartialEq, Debug)]
 pub struct Trie {
     children: HashMap<char, Trie>,
 }
@@ -30,7 +31,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_hoge() {
-        assert_eq!(1 + 1, 2);
+    fn test_new() {
+        assert_eq!(
+            Trie::new(),
+            Trie {
+                children: HashMap::new()
+            }
+        );
     }
 }
